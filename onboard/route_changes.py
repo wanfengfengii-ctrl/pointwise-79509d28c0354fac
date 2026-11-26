@@ -19,10 +19,31 @@ def recheck_pending_requests(db, request):
     progress = read_progress(db, request.trip)
     if progress.loaded.closed:
         return False
-    if request.generation != progress.loaded.generation:
-        return any(call.name == request.name for call in progress.remaining)
+    # Retention is the exact stop call: occurrence plus physical location.
+    # A different position in the future suffix is allowed; another occurrence
+    # with the same display name is not the same promise.
     call = progress.future_call(request.occurrence)
     return call is not None and call.station == request.station
+
+
+def terminate_queued_removals(db, trip, removed):
+    """Make deletion-before-speech permanent for the affected request numbers."""
+    affected = set(removed)
+    if not affected:
+        return
+    rows = db.execute(
+        'SELECT request, occurrence, station FROM confirmations '
+        "WHERE trip = ? AND status = 'queued'",
+        (trip,),
+    ).fetchall()
+    for row in rows:
+        if (row['occurrence'], row['station']) not in affected:
+            continue
+        db.execute(
+            "UPDATE confirmations SET status = 'terminated' "
+            'WHERE trip = ? AND request = ? AND status = ?',
+            (trip, row['request'], 'queued'),
+        )
 
 
 def apply_diversion(db, trip, request, base, target, removed):
@@ -68,4 +89,5 @@ def _evaluate_and_apply(db, loaded, base, target, removed):
         if error.code != 'arrived_prefix_conflict':
             raise
         return error.code, []
+    terminate_queued_removals(db, loaded.trip, removed)
     return None, []
