@@ -1,0 +1,6 @@
+[
+  {"station": "east", "name": "河桥", "location": "东口"},
+  {"station": "west", "name": "河桥", "location": "西口"},
+  {"station": "center", "name": "社区中心", "location": "南门"},
+  {"station": "market", "name": "街市", "location": "北门"}
+]

@@ -1,0 +1,19 @@
+[
+  {
+    "line": "river",
+    "revision": "R1",
+    "calls": [
+      {"occurrence": "E1", "station": "east"},
+      {"occurrence": "E2", "station": "west"}
+    ]
+  },
+  {
+    "line": "river",
+    "revision": "R-WALK",
+    "calls": [
+      {"occurrence": "A", "station": "center"},
+      {"occurrence": "E1", "station": "east"},
+      {"occurrence": "E2", "station": "west"}
+    ]
+  }
+]
